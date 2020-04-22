@@ -1,8 +1,10 @@
 {
     "python.pythonPath": "venv/bin/python",
     "python.autoComplete.extraPaths": [
-        "src"
+        "src",
+        "tests"
     ],
+    "python.testing.pytestEnabled": true,
     "cSpell.words": [
         "XDIST",
         "datefmt",

@@ -51,7 +51,7 @@ class TestHelper:
             logging.root.removeHandler(handler)
         logging.basicConfig(
             level=logging.DEBUG,
-            format=f"%(asctime)s.%(msecs)03d [{self.worker}] %(levelname)s %(message)s --- %(filename)s:%(funcName)s:%(lineno)d",
+            format=f"%(asctime)s.%(msecs)03d [{self.worker}/%(name)s] %(levelname)s %(message)s - %(filename)s:%(funcName)s:%(lineno)d",
             datefmt="%Y-%m-%d %H:%M:%S",
             filename=str(self.test_folder / "pytest.log"),
             filemode="w",
