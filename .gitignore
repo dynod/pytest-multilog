@@ -11,3 +11,7 @@ out/
 
 # Coverage
 .coverage
+
+# Generated setup files
+/setup.cfg
+/setup.py
