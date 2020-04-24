@@ -1,8 +1,7 @@
 {
     "python.pythonPath": "venv/bin/python",
     "python.autoComplete.extraPaths": [
-        "src",
-        "tests"
+        "src"
     ],
     "python.testing.pytestEnabled": true,
     "cSpell.words": [
