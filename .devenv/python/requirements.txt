@@ -1,0 +1,3 @@
+# Works with pytest and pytest-xdist
+pytest
+pytest-xdist
