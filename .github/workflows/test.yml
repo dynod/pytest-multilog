@@ -36,3 +36,12 @@ jobs:
               with:
                   name: tests logs and report
                   path: tools/pytest-multilog/out/tests
+
+            # Publish to Pypi (only on tags push)
+            - name: Publish package
+              if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+              uses: pypa/gh-action-pypi-publish@v1.1.0
+              with:
+                  user: __token__
+                  password: ${{ secrets.pypi_password }}
+                  packages_dir: tools/pytest-multilog/out/artifacts/python

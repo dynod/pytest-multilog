@@ -5,12 +5,14 @@
     ],
     "python.testing.pytestEnabled": true,
     "cSpell.words": [
+        "Pypi",
         "XDIST",
         "datefmt",
         "msecs",
         "multilog",
         "noqa",
         "ptmultilog",
+        "pypa",
         "pytest",
         "pytestconfig"
     ]
