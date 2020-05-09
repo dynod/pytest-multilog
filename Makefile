@@ -7,9 +7,6 @@ PROJECT_ROOT := $(CURDIR)
 # Python package name
 PYTHON_PACKAGE := pytest-multilog
 
-# Be backward compatible with python 3.6 for tools
-PYTHON_FOR_VENV := python3.6
-
 # Main makefile suite - defs
 include $(WORKSPACE_ROOT)/.workspace/main.mk
 
