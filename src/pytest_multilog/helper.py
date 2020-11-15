@@ -3,6 +3,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
+from typing import List, Union
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -20,6 +21,22 @@ class TestHelper:
     def test_folder(self) -> Path:
         return self.output_folder / "__running__" / self.worker / self.test_name
 
+    # Test logs
+    @property
+    def test_logs(self) -> Path:
+        return self.test_folder / "pytest.log"
+
+    # Log content assertion
+    def check_logs(self, expected: Union[str, List[str]]):
+        # Get logs content
+        with self.test_logs.open("r") as f:
+            logs = f.read()
+            to_check = expected if isinstance(expected, list) else [expected]
+
+            # Verify all patterns are found in logs
+            for expected_pattern in to_check:
+                assert expected_pattern in logs, f"Expected pattern not found in logs: {expected_pattern}"
+
     # Test folder (final)
     @property
     def __test_final_folder(self) -> Path:
@@ -34,6 +51,12 @@ class TestHelper:
     @property
     def worker(self) -> str:
         return os.environ["PYTEST_XDIST_WORKER"] if "PYTEST_XDIST_WORKER" in os.environ else "master"
+
+    # Worker int index
+    @property
+    def worker_index(self) -> int:
+        worker = self.worker
+        return int(worker[2:]) if worker.startswith("gw") else 0
 
     # Per-test logging management
     @pytest.fixture
@@ -53,7 +76,7 @@ class TestHelper:
             level=logging.DEBUG,
             format=f"%(asctime)s.%(msecs)03d [{self.worker}/%(name)s] %(levelname)s %(message)s - %(filename)s:%(funcName)s:%(lineno)d",
             datefmt="%Y-%m-%d %H:%M:%S",
-            filename=str(self.test_folder / "pytest.log"),
+            filename=str(self.test_logs),
             filemode="w",
         )
         logging.info("-----------------------------------------------------------------------------------")
