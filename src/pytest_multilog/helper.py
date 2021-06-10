@@ -2,6 +2,7 @@
 import logging
 import os
 import shutil
+import time
 from pathlib import Path
 from typing import List, Union
 
@@ -27,15 +28,35 @@ class TestHelper:
         return self.test_folder / "pytest.log"
 
     # Log content assertion
-    def check_logs(self, expected: Union[str, List[str]]):
-        # Get logs content
-        with self.test_logs.open("r") as f:
-            logs = f.read()
-            to_check = expected if isinstance(expected, list) else [expected]
+    def check_logs(self, expected: Union[str, List[str]], timeout: int = None):
+        """
+        Verify if expected pattern(s) can be found in current test logs
 
-            # Verify all patterns are found in logs
-            for expected_pattern in to_check:
-                assert expected_pattern in logs, f"Expected pattern not found in logs: {expected_pattern}"
+        If timeout is provided, loop until either the pattern(s) is/are found or the timeout expires
+        """
+        retry = True
+        init_time = time.time()
+        while retry:
+            try:
+                # Get logs content
+                with self.test_logs.open("r") as f:
+                    logs = f.read()
+                    to_check = expected if isinstance(expected, list) else [expected]
+
+                    # Verify all patterns are found in logs
+                    for expected_pattern in to_check:
+                        assert expected_pattern in logs, f"Expected pattern not found in logs: {expected_pattern}"
+
+                    # If we get here: all expected patterns are found
+                    retry = False
+            except AssertionError as e:
+                # Some pattern is still not found
+                if timeout is None or (time.time() - init_time) >= timeout:
+                    # No timeout, or timeout expired: raise assertion error
+                    raise e
+                else:
+                    # Sleep a bit before checking logs again
+                    time.sleep(0.5)
 
     # Test folder (final)
     @property
