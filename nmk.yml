@@ -1,0 +1,23 @@
+refs:
+    # Reference plugins
+    - pip://nmk-python!plugin.yml
+    - pip://nmk-github!plugin.yml
+    - pip://nmk-vscode!plugin.yml
+    - <workspace>/shared.yml
+    - workspace:
+        local: ../../../../shared
+        remote: github://dynod/workspace/main/shared
+
+config:
+    # Python package
+    pythonPackage: pytest-multilog
+    
+    # Works with pytest and pytest-xdist
+    pythonPackageRequirements:
+        - pytest
+        - pytest-xdist
+
+    # Extra setup data
+    pythonSetupItems:
+        metadata:
+            description: Multi-process logs handling and other helpers for pytest
