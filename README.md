@@ -45,7 +45,9 @@ It means that during the test execution, it's possible to check which test is ru
 ### Checking logs
 It is possible to verify if some strings are present in the current test log, by using the **`TestHelper.check_logs`** method.
 It takes as input argument:
-* either a simple string or a list of strings
+* either a simple string/Pattern or a list of strings/Patterns:
+  * strings will be simply checked to be contained in the whole log
+  * Patterns will be searched line by line (more flexible, but slower)
 * an optional timeout
 
-The method will assert if all input strings are found in the log (within the expected timeout, if any).
+The method will assert if all inputs are found in the log (within the expected timeout, if any).

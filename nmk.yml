@@ -5,7 +5,7 @@ refs:
     - pip://nmk-vscode!plugin.yml
     - <workspace>/shared.yml
     - workspace:
-        local: ../../../../shared
+        local: ../../shared
         remote: github://dynod/workspace/main/shared
 
 config:
