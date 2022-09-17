@@ -1,5 +1,6 @@
 # Test for Test Helper
 import logging
+import re
 import time
 from pathlib import Path
 from threading import Event, Thread
@@ -22,9 +23,9 @@ class TestTheHelper(TestHelper):
         time.sleep(1)
         logging.info("Log From Thread !!!")
 
-    def test_checklogs(self):
+    def test_checklogs_string(self):
         # Simple
-        self.check_logs("New test: test_simple_TestTheHelper_test_checklogs")
+        self.check_logs("New test: test_simple_TestTheHelper_test_checklogs_string")
         self.check_logs(["helper.py", "TestTheHelper"])
 
         # No match
@@ -47,3 +48,21 @@ class TestTheHelper(TestHelper):
         # Wait for log sent by logging thread
         self.check_logs("Log From Thread !!!", timeout=2)
         t.join()
+
+    def test_checklogs_pattern(self):
+        # Simple
+        self.check_logs(re.compile("New test: test_simple_[^_ ]+_test_checklogs_pattern"))
+
+        # No match
+        try:
+            self.check_logs(re.compile("some *unknown +logs"))
+            raise Exception("Shouldn't get here")
+        except AssertionError as e:
+            assert "Expected pattern not found in logs" in str(e)
+
+    def test_emoji_logs(self):
+        # Add emoji in logs
+        logging.info("Some logs with emoji ! -- 💀 --")
+
+        # Verify we can check for it
+        self.check_logs("-- 💀 --")
