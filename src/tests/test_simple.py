@@ -33,7 +33,7 @@ class TestTheHelper(TestHelper):
             self.check_logs("some unknown log")
             raise Exception("Shouldn't get here")
         except AssertionError as e:
-            assert "Expected pattern not found in logs" in str(e)
+            assert "Missing patterns: ['some unknown log']" in str(e)
 
         # With timeout, but first find is OK
         logging.info("new log entry !!!")
@@ -58,7 +58,7 @@ class TestTheHelper(TestHelper):
             self.check_logs(re.compile("some *unknown +logs"))
             raise Exception("Shouldn't get here")
         except AssertionError as e:
-            assert "Expected pattern not found in logs" in str(e)
+            assert "Missing patterns: ['some *unknown +logs']" in str(e)
 
     def test_emoji_logs(self):
         # Add emoji in logs
@@ -66,3 +66,18 @@ class TestTheHelper(TestHelper):
 
         # Verify we can check for it
         self.check_logs("-- 💀 --")
+
+    def test_logs_order(self):
+        # Add logs in a given order
+        logging.info("first log")
+        logging.info("second log")
+
+        # Check in any order
+        self.check_logs(["second log", "first log"])
+
+        # Check with required order
+        try:
+            self.check_logs(["second log", "first log"], check_order=True)
+            raise Exception("Shouldn't get here")
+        except AssertionError as e:
+            assert "Missing patterns: ['first log']" in str(e)

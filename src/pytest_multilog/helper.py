@@ -29,7 +29,7 @@ class TestHelper:
         return self.test_folder / "pytest.log"
 
     # Log content assertion
-    def check_logs(self, expected: Union[str, Pattern, List[Union[str, Pattern]]], timeout: int = None):
+    def check_logs(self, expected: Union[str, Pattern, List[Union[str, Pattern]]], timeout: int = None, check_order: bool = False):
         """
         Verify if expected pattern(s) can be found in current test logs.
 
@@ -39,28 +39,47 @@ class TestHelper:
             - a list of both (all list items must match)
 
         If timeout is provided, loop until either the pattern(s) is/are found or the timeout expires.
+
+        If check_order is True, patterns will be verified in specified order; order doesn't matter otherwise
         """
         retry = True
         init_time = time.time()
         to_check = expected if isinstance(expected, list) else [expected]
+
+        # Iterate until timeout expires (if any)
         while retry:
             try:
                 # Get logs content
                 with self.test_logs.open("r", encoding="utf-8") as f:
-                    logs = f.read()
+                    lines = f.readlines()
 
                     # Verify all patterns are found in logs
+                    start_index = 0
+                    not_found_patterns = [p.pattern if isinstance(p, Pattern) else p for p in to_check]
+
+                    # Iterate on patterns
                     for expected_pattern in to_check:
-                        if isinstance(expected_pattern, Pattern):
-                            # Check for regular expression (at least one line match)
-                            for log_line in logs.splitlines(keepends=False):
-                                if expected_pattern.search(log_line) is not None:
-                                    break
+                        # Iterate on lines
+                        for current_index, line_to_check in enumerate(lines[start_index:], start_index):
+                            p_found = None
+                            if isinstance(expected_pattern, Pattern):
+                                # Check for regular expression (at least one line match)
+                                if expected_pattern.search(line_to_check) is not None:
+                                    p_found = expected_pattern.pattern
                             else:
-                                raise AssertionError(f"Expected pattern not found in logs: {expected_pattern.pattern}")
-                        else:
-                            # Simple string check
-                            assert expected_pattern in logs, f"Expected pattern not found in logs: {expected_pattern}"
+                                # Simple string check
+                                if expected_pattern in line_to_check:
+                                    p_found = expected_pattern
+
+                            # Pattern found (only first match)?
+                            if p_found is not None and p_found in not_found_patterns:
+                                not_found_patterns.remove(p_found)
+                                if check_order:
+                                    # Next pattern will have to be found after this line (patterns must respect input order)
+                                    start_index = current_index + 1
+
+                    # Verify we found all patterns
+                    assert len(not_found_patterns) == 0, f"Missing patterns: {not_found_patterns}"
 
                     # If we get here: all expected patterns are found
                     retry = False
