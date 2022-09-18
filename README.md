@@ -49,5 +49,9 @@ It takes as input argument:
   * strings will be simply checked to be contained in the whole log
   * Patterns will be searched line by line (more flexible, but slower)
 * an optional timeout
+* a **`check_order`** parameter to verify patterns order (default if False)
 
 The method will assert if all inputs are found in the log (within the expected timeout, if any).
+
+By default, expected patterns order doesn't matter.
+If **`check_order`** parameter is set to True, patterns will be expected in the input order, and check will fail if the order doesn't match.
