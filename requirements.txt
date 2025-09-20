@@ -11,6 +11,7 @@ nmk-base
 nmk-github
 nmk-python
 nmk-vscode
+pathvalidate
 pytest
 pytest-xdist
 
