@@ -5,7 +5,7 @@ import shutil
 import time
 from pathlib import Path
 from re import Pattern
-from typing import List, Union
+from typing import Union
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -29,7 +29,7 @@ class TestHelper:
         return self.test_folder / "pytest.log"
 
     # Log content assertion
-    def check_logs(self, expected: Union[str, Pattern, List[Union[str, Pattern]]], timeout: int = None, check_order: bool = False):
+    def check_logs(self, expected: Union[str, Pattern[str], list[Union[str, Pattern[str]]]], timeout: Union[int, None] = None, check_order: bool = False):
         """
         Verify if expected pattern(s) can be found in current test logs.
 
@@ -41,6 +41,11 @@ class TestHelper:
         If timeout is provided, loop until either the pattern(s) is/are found or the timeout expires.
 
         If check_order is True, patterns will be verified in specified order; order doesn't matter otherwise
+
+        :param expected: Expected pattern(s) to find in logs
+        :param timeout: Timeout in seconds (None for no timeout)
+        :param check_order: If True, patterns must be found in specified order
+        :raises AssertionError: If some pattern is not found (after timeout if specified, else immediately)
         """
         retry = True
         init_time = time.time()
@@ -105,7 +110,7 @@ class TestHelper:
     # Worker name in parallelized tests
     @property
     def worker(self) -> str:
-        return os.environ["PYTEST_XDIST_WORKER"] if "PYTEST_XDIST_WORKER" in os.environ else "master"
+        return os.environ.get("PYTEST_XDIST_WORKER", "master")
 
     # Worker int index
     @property
@@ -117,7 +122,7 @@ class TestHelper:
     @pytest.fixture
     def logs(self, request: FixtureRequest):
         # Set root folder
-        self.root_folder = Path(request.config.rootdir).absolute().resolve()
+        self.root_folder = request.config.rootpath.absolute().resolve()
 
         # Prepare test folder
         shutil.rmtree(self.test_folder, ignore_errors=True)

@@ -1,2 +1,5 @@
 # pytest-multilog API
-from pytest_multilog.helper import TestHelper  # noqa: F401
+from pytest_multilog.helper import TestHelper
+
+# Exported API
+__all__ = ["TestHelper"]

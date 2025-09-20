@@ -19,6 +19,6 @@ config:
         - pytest-xdist
 
     # Extra setup data
-    pythonSetupItems:
-        metadata:
+    pythonProjectFileItems:
+        project:
             description: Multi-process logs handling and other helpers for pytest
