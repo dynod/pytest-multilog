@@ -17,6 +17,7 @@ config:
     pythonPackageRequirements:
         - pytest
         - pytest-xdist
+        - pathvalidate
 
     # Extra setup data
     pythonProjectFileItems:

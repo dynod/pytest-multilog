@@ -5,17 +5,21 @@ import time
 from pathlib import Path
 from threading import Event, Thread
 
+import pytest
+
 from pytest_multilog import TestHelper
 
 
 class TestTheHelper(TestHelper):
     def test_simple(self):
         # Just some basic tests
-        assert self.worker.startswith("gw")
+        assert self.worker.startswith("gw") or self.worker == "master"
         assert self.worker_index >= 0
         assert self.root_folder == Path(__file__).parent.parent.parent
         assert self.output_folder == self.root_folder / "out" / "tests"
-        assert self.test_folder == self.output_folder / "__running__" / "gw0" / "test_simple_TestTheHelper_test_simple"
+        assert self.test_folder == self.output_folder / "__running__" / self.worker / "simple_TheHelper_simple"
+        assert self.test_final_folder == self.output_folder / "simple" / "TheHelper" / "simple"
+        assert self.test_name == "simple/TheHelper/simple"
         assert self.test_logs.exists()
 
     def add_log(self, event: Event):
@@ -25,8 +29,8 @@ class TestTheHelper(TestHelper):
 
     def test_checklogs_string(self):
         # Simple
-        self.check_logs("New test: test_simple_TestTheHelper_test_checklogs_string")
-        self.check_logs(["helper.py", "TestTheHelper"])
+        self.check_logs("New test: simple/TheHelper/checklogs_string")
+        self.check_logs(["helper.py", "TheHelper"])
 
         # No match
         try:
@@ -51,7 +55,7 @@ class TestTheHelper(TestHelper):
 
     def test_checklogs_pattern(self):
         # Simple
-        self.check_logs(re.compile("New test: test_simple_[^_ ]+_test_checklogs_pattern"))
+        self.check_logs(re.compile("New test: simple/[^/ ]+/checklogs_pattern"))
 
         # No match
         try:
@@ -81,3 +85,16 @@ class TestTheHelper(TestHelper):
             raise Exception("Shouldn't get here")
         except AssertionError as e:
             assert "Missing patterns: ['first log']" in str(e)
+
+    @pytest.mark.parametrize(["param", "ids"], [[1, "one"], [2, "two?"]])
+    def test_path_with_parameterize(self, param: int, ids: str):
+        assert param in [1, 2]
+        assert ids in ["one", "two?"]
+
+
+class Test(TestHelper):
+    def test_simple(self):
+        # Check name with the Class name filtered out (empty part after prefix removal)
+        assert self.test_folder == self.output_folder / "__running__" / self.worker / "simple_simple"
+        assert self.test_final_folder == self.output_folder / "simple" / "simple"
+        assert self.test_name == "simple/simple"
