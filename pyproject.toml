@@ -32,7 +32,7 @@ Issues = "https://github.com/dynod/pytest-multilog/issues?q=is%3Aopen+is%3Aissue
 
 [tool.setuptools.packages.find]
 where = ["src"]
-exclude = ["tests"]
+exclude = ["tests*"]
 namespaces = false
 
 [tool.setuptools.package-data]
