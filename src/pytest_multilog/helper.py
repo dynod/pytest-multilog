@@ -5,7 +5,6 @@ import shutil
 import time
 from pathlib import Path
 from re import Pattern
-from typing import Union
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -38,7 +37,7 @@ class TestHelper:
 
         return self.test_folder / "pytest.log"
 
-    def check_logs(self, expected: Union[str, Pattern[str], list[Union[str, Pattern[str]]]], timeout: Union[int, None] = None, check_order: bool = False):
+    def check_logs(self, expected: str | Pattern[str] | list[str | Pattern[str]], timeout: int | None = None, check_order: bool = False):
         """
         Verify if expected pattern(s) can be found in current test logs.
 
