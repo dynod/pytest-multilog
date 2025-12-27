@@ -4,6 +4,7 @@
         "tamasfe.even-better-toml",
         "charliermarsh.ruff",
         "ms-python.python",
+        "prettier.prettier-vscode",
         "eamodio.gitlens",
         "streetsidesoftware.code-spell-checker"
     ]
