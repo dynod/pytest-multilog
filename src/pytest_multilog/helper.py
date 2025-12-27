@@ -206,14 +206,12 @@ class TestHelper:
         self.test_folder.mkdir(parents=True, exist_ok=False)
 
         # Install logging
-        for handler in logging.root.handlers[:]:
-            logging.root.removeHandler(handler)
         log_format = f"%(asctime)s.%(msecs)03d [{self.worker}/%(name)s] %(levelname)s %(message)s - %(filename)s:%(funcName)s:%(lineno)d"
         date_format = "%Y-%m-%d %H:%M:%S"
-        logging.basicConfig(level=logging.DEBUG, format=log_format, datefmt=date_format)
-        handler = logging.FileHandler(filename=str(self.test_logs), mode="w", encoding="utf-8")
-        handler.setFormatter(logging.Formatter(log_format, date_format))
-        logging.getLogger().addHandler(handler)
+        test_file_handler = logging.FileHandler(filename=str(self.test_logs), mode="w", encoding="utf-8")
+        test_file_handler.setFormatter(logging.Formatter(log_format, date_format))
+        logging.root.setLevel(logging.DEBUG)
+        logging.root.addHandler(test_file_handler)
 
         logging.info("-----------------------------------------------------------------------------------")
         logging.info(f"    New test: {self.test_name}")
@@ -226,7 +224,8 @@ class TestHelper:
         logging.info("-----------------------------------------------------------------------------------")
         logging.info(f"    End of test: {self.test_name}")
         logging.info("-----------------------------------------------------------------------------------")
-        logging.shutdown()
+        test_file_handler.close()
+        logging.root.removeHandler(test_file_handler)
 
         # Move folder
         shutil.move(self.test_folder, self.test_final_folder)
