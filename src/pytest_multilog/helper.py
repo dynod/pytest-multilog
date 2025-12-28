@@ -1,4 +1,5 @@
 # Common test class with miscellaneous utilities and fixtures
+import contextlib
 import logging
 import os
 import shutil
@@ -229,4 +230,6 @@ class TestHelper:
 
         # Move folder
         shutil.move(self.test_folder, self.test_final_folder)
-        self.test_folder.parent.rmdir()
+        with contextlib.suppress(OSError):
+            # Tentatively remove worker folder if empty
+            self.test_folder.parent.rmdir()
