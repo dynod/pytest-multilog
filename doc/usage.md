@@ -13,7 +13,7 @@ class TestCustom(TestHelper):
 
 The **[`TestHelper`](pytest_multilog.helper.TestHelper)** class declares a **[`logs`](pytest_multilog.helper.TestHelper.logs)** fixture which will be automatically used by its children classes.
 
-## Logging behavior and related properties
+## Test folders and related properties
 
 ### Root folder
 
@@ -22,6 +22,9 @@ The **[`TestHelper`](pytest_multilog.helper.TestHelper)** class provides a **[`r
 ```{note}
 This property is initialized by the **[`logs`](pytest_multilog.helper.TestHelper.logs)** fixture, so make sure this fixture is called (in particular from other fixtures) before using **[`root_folder`](pytest_multilog.helper.TestHelper.root_folder)** or any derived property.
 ```
+
+_<span style="color:orange">Changed in version 1.7.0</span>_<br/>
+This property setup and the related folders cleaning/setup/final copy is handled by the **[`logs_folder_setup`](pytest_multilog.helper.TestHelper.logs_folder_setup)** fixture.
 
 ### Output folder
 
@@ -58,9 +61,34 @@ Test logs will be written to a **pytest.log** file (path provided in **[`test_lo
 It means that during the test execution, it's possible to check which test is running on which worker
 (easing troubleshooting situations where a given worker is blocked)
 
+---
+
+## Log handlers
+
+_<span style="color:green">Added in version 1.7.0</span>_<br/>
+
+### Default handler
+
+**[`TestHelper`](pytest_multilog.helper.TestHelper)** class sets up a default logging handler which write each test logs to its own **[`test_logs`](pytest_multilog.helper.TestHelper.test_logs)** file.
+
+This handler is handled with the following fixtures:
+
+- **[`default_multilog_format`](pytest_multilog.helper.TestHelper.default_multilog_format)**: provides default handler log message format
+- **[`default_multilog_date_format`](pytest_multilog.helper.TestHelper.default_multilog_date_format)**: provides default handler log date format
+- **[`default_multilog_handler`](pytest_multilog.helper.TestHelper.default_multilog_handler)**: provides default handler instance
+
+### Extra handlers
+
+It is also possible to provide extra logging handlers by overriding the **[`extra_multilog_handlers`](pytest_multilog.helper.TestHelper.extra_multilog_handlers)** fixture. These handlers will be handled automatically by the **[`logs`](pytest_multilog.helper.TestHelper.logs)** fixture:
+
+- plugged in the logging system before running the test
+- after the test execution: properly closed and unplugged from the logging system
+
+---
+
 ## Checking logs
 
-It is possible to verify if some strings are present in the current test log, by using the **[`check_logs`](pytest_multilog.helper.TestHelper.check_logs)** method.
+It is possible to verify if some strings are present in the current **[`test_logs`](pytest_multilog.helper.TestHelper.test_logs)** file, by using the **[`check_logs`](pytest_multilog.helper.TestHelper.check_logs)** method.
 It takes as input argument:
 
 - either a simple string/Pattern or a list of strings/Patterns:

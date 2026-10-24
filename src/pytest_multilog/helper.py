@@ -7,6 +7,7 @@ import logging
 import os
 import shutil
 import time
+from collections.abc import Generator
 from pathlib import Path
 from re import Pattern
 
@@ -214,9 +215,14 @@ class TestHelper:
         return int(worker[2:]) if worker.startswith("gw") else 0
 
     @pytest.fixture
-    def logs(self, request: FixtureRequest):
+    def logs_folder_setup(self, request: FixtureRequest) -> Generator[Path, None, None]:
         """
-        Main logging setup fixture, automatically called for each test, to prepare test folder and logs file, and to install logging handler.
+        Logs folder setup fixture
+
+        * sets the root_folder attribute
+        * clean test/final folders
+        * yield to test
+        * moves test folder to final folder after test completion
         """
 
         # Set root folder
@@ -227,13 +233,58 @@ class TestHelper:
         shutil.rmtree(self.test_final_folder, ignore_errors=True)
         self.test_folder.mkdir(parents=True, exist_ok=False)
 
-        # Install logging
-        log_format = f"%(asctime)s.%(msecs)03d [{self.worker}/%(name)s] %(levelname)s %(message)s - %(filename)s:%(funcName)s:%(lineno)d"
-        date_format = "%Y-%m-%d %H:%M:%S"
-        test_file_handler = logging.FileHandler(filename=str(self.test_logs), mode="w", encoding="utf-8")
-        test_file_handler.setFormatter(logging.Formatter(log_format, date_format))
+        yield self.root_folder
+
+        # Move folder
+        shutil.move(self.test_folder, self.test_final_folder)
+        with contextlib.suppress(OSError):
+            # Tentatively remove worker folder if empty
+            self.test_folder.parent.rmdir()
+
+    @pytest.fixture
+    def default_multilog_format(self) -> str:
+        """
+        Message format for default multilog handler instance
+        """
+        return f"%(asctime)s.%(msecs)03d [{self.worker}/%(name)s] %(levelname)s %(message)s - %(filename)s:%(funcName)s:%(lineno)d"
+
+    @pytest.fixture
+    def default_multilog_date_format(self) -> str:
+        """
+        Date format for default multilog handler instance
+        """
+        return "%Y-%m-%d %H:%M:%S"
+
+    @pytest.fixture
+    def default_multilog_handler(self, logs_folder_setup: Path, default_multilog_format: str, default_multilog_date_format: str) -> logging.FileHandler:
+        """
+        Default multi-process logging handler fixture (pytest.log in test folder).
+        """
+
+        # Prepare logger
+        test_file_handler = logging.FileHandler(filename=str(self.test_logs), mode="w", encoding="utf-8", errors="ignore", delay=True)
+        test_file_handler.setFormatter(logging.Formatter(default_multilog_format, default_multilog_date_format))
+        return test_file_handler
+
+    @pytest.fixture
+    def extra_multilog_handlers(self) -> list[logging.Handler]:
+        """
+        Extra multi-process logging handlers fixture, providing a list of extra logging handlers to install (empty by default).
+        """
+
+        return []
+
+    @pytest.fixture
+    def logs(self, logs_folder_setup: Path, default_multilog_handler: logging.FileHandler, extra_multilog_handlers: list[logging.Handler]):
+        """
+        Main logging setup fixture, automatically called for each test, to prepare test folder and logs file, and to install logging handler.
+        """
+
+        # Install logging handlers
+        handlers = [default_multilog_handler] + extra_multilog_handlers
         logging.root.setLevel(logging.DEBUG)
-        logging.root.addHandler(test_file_handler)
+        for handler in handlers:
+            logging.root.addHandler(handler)
 
         logging.info("-----------------------------------------------------------------------------------")
         logging.info(f"    New test: {self.test_name}")
@@ -246,11 +297,6 @@ class TestHelper:
         logging.info("-----------------------------------------------------------------------------------")
         logging.info(f"    End of test: {self.test_name}")
         logging.info("-----------------------------------------------------------------------------------")
-        test_file_handler.close()
-        logging.root.removeHandler(test_file_handler)
-
-        # Move folder
-        shutil.move(self.test_folder, self.test_final_folder)
-        with contextlib.suppress(OSError):
-            # Tentatively remove worker folder if empty
-            self.test_folder.parent.rmdir()
+        for handler in handlers[::-1]:
+            handler.close()
+            logging.root.removeHandler(handler)
