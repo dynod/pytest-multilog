@@ -11,6 +11,12 @@ The fully detailed changelog is also available on [Github](https://github.com/dy
 ## Release 1.7
 
 - Provide a real documentation
+- Add fixtures to allow extra logging handlers usage:
+  - **[`logs_folder_setup`](pytest_multilog.helper.TestHelper.logs_folder_setup)**: to separate test folder setup from logging logic
+  - **[`default_multilog_format`](pytest_multilog.helper.TestHelper.default_multilog_format)**: to allow overriding default handler log message format
+  - **[`default_multilog_date_format`](pytest_multilog.helper.TestHelper.default_multilog_date_format)**: to allow overriding default handler log date format
+  - **[`default_multilog_handler`](pytest_multilog.helper.TestHelper.default_multilog_handler)**: to allow overriding default handler instance
+  - **[`extra_multilog_handlers`](pytest_multilog.helper.TestHelper.extra_multilog_handlers)**: to allow providing extra logging handlers
 
 ## Release 1.6
 
