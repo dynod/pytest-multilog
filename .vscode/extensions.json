@@ -5,6 +5,7 @@
         "charliermarsh.ruff",
         "ms-python.python",
         "esbenp.prettier-vscode",
+        "jebbs.plantuml",
         "eamodio.gitlens",
         "streetsidesoftware.code-spell-checker"
     ]

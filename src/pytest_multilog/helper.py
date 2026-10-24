@@ -1,4 +1,7 @@
-# Common test class with miscellaneous utilities and fixtures
+"""
+Main module providing common test class with miscellaneous utilities and fixtures
+"""
+
 import contextlib
 import logging
 import os
@@ -14,6 +17,21 @@ from pathvalidate import sanitize_filename
 
 @pytest.mark.usefixtures("logs")
 class TestHelper:
+    """
+    Base class for tests, providing common utilities and fixtures.
+
+    Test classes can simply inherit from this class to get access to them.
+    """
+
+    @property
+    def root_folder(self) -> Path:
+        """
+        Root test folder (i.e. **pytest** root folder)
+        """
+
+        assert hasattr(self, "_root_folder"), "Root folder is not set yet (make sure to use the 'logs' fixture first)"
+        return self._root_folder
+
     @property
     def output_folder(self) -> Path:
         """
@@ -137,7 +155,7 @@ class TestHelper:
         Test name, computed to be unique for each test, and to reflect test file path, class name, method name, and parameters (if any).
 
         Example: for a test method named "test_simple" in class "TestTheHelper" in file "tests/subtests/test_fromsubmodule.py",
-                 the test name will be "subtests/test_fromsubmodule/TestTheHelper/test_simple".
+                 the test name will be "subtests/fromsubmodule/TheHelper/simple".
                  If the test method is parameterized:
                     * parameters will be included in the method name (e.g. "test_simple[param1-param2]")
                     * parameters values are sanitized to be valid folder names
@@ -195,11 +213,14 @@ class TestHelper:
         worker = self.worker
         return int(worker[2:]) if worker.startswith("gw") else 0
 
-    # Per-test logging management
     @pytest.fixture
     def logs(self, request: FixtureRequest):
+        """
+        Main logging setup fixture, automatically called for each test, to prepare test folder and logs file, and to install logging handler.
+        """
+
         # Set root folder
-        self.root_folder = request.config.rootpath.absolute().resolve()
+        self._root_folder = request.config.rootpath.absolute().resolve()
 
         # Prepare test folder
         shutil.rmtree(self.test_folder, ignore_errors=True)

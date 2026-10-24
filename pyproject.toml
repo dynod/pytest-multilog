@@ -48,9 +48,11 @@ Issues = "https://github.com/dynod/pytest-multilog/issues?q=is%3Aopen+is%3Aissue
 dev = [
     "nmk-badges",
     "nmk-base",
+    "nmk-doc",
     "nmk-github",
     "nmk-python",
     "nmk-vscode",
+    "sphinx-autoapi",
 ]
 
 [tool.setuptools.packages.find]

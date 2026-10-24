@@ -1,4 +1,7 @@
-# pytest-multilog API
+"""
+Multi-process logs handling and other helpers for pytest
+"""
+
 from pytest_multilog.helper import TestHelper
 
 # Exported API
